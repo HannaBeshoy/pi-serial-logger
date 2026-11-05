@@ -1,0 +1,16 @@
+# systemd unit for the Raspberry Pi: sudo cp deploy/sensor-logger.service /etc/systemd/system/
+# then: sudo systemctl daemon-reload && sudo systemctl enable --now sensor-logger
+[Unit]
+Description=Sensor logger (Arduino over USB serial)
+After=network.target
+
+[Service]
+User=pi
+Environment=SENSOR_LOG_DIR=/home/pi/sensor-logs
+ExecStart=/home/pi/pi-serial-logger/build/logger -d /dev/ttyACM0
+# SIGHUP reopens the log file (for logrotate); SIGTERM, sent by "systemctl stop", shuts down cleanly
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
